@@ -7,10 +7,10 @@ from adafruit_hid.keyboard import Keyboard
 from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS
 from adafruit_hid.keycode import Keycode
 
-time.sleep(1)  # Sleep for a bit to avoid a race condition on some systems
+time.sleep(3)  # Sleep for a bit to avoid a race condition on some systems
 
 # LED setup
-led = digitalio.DigitalInOut(board.D13)
+led = digitalio.DigitalInOut(board.LED)
 led.direction = digitalio.Direction.OUTPUT
 led.value = False
 
@@ -34,10 +34,10 @@ firstUse = True
 
 while True:
     # if the keypad is pressed, the led will light up. If the keypad is not pressed, the led will not light up.
-    if keypad.pressed_keys:
-        led.value = True
-    else:
-        led.value = False
+    # if keypad.pressed_keys:
+    #     led.value = True
+    # else:
+    #     led.value = False
 
     keys = keypad.pressed_keys
 
@@ -47,6 +47,7 @@ while True:
                 firstUse = False
             else:
                 print("hangUp")
+                led.value = False
                 keyboard.press(Keycode.LEFT_SHIFT, Keycode.LEFT_ALT,
                                Keycode.LEFT_CONTROL, Keycode.H)
                 keyboard.release_all()
@@ -55,6 +56,7 @@ while True:
         if hookChanged:
             print("pickUp")
             hookChanged = False
+            led.value = True
             keyboard.press(Keycode.LEFT_SHIFT, Keycode.LEFT_ALT,
                            Keycode.LEFT_CONTROL, Keycode.P)
             keyboard.release_all()
@@ -93,4 +95,4 @@ while True:
             print("keyUp")
             keyboard.release_all()
             keyDown = False
-    time.sleep(0.125)
+    time.sleep(0.025)
