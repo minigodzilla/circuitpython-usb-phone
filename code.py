@@ -6,6 +6,7 @@ import usb_hid
 from adafruit_hid.keyboard import Keyboard
 from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS
 from adafruit_hid.keycode import Keycode
+import supervisor
 
 time.sleep(3)  # Sleep for a bit to avoid a race condition on some systems
 
@@ -31,13 +32,28 @@ keypad = adafruit_matrixkeypad.Matrix_Keypad(rows, cols, keys)
 hookChanged = False
 keyDown = False
 firstUse = True
+ringIncoming = False
 
 while True:
-    # if the keypad is pressed, the led will light up. If the keypad is not pressed, the led will not light up.
-    # if keypad.pressed_keys:
-    #     led.value = True
-    # else:
-    #     led.value = False
+    # Check for incoming serial message
+    if supervisor.runtime.serial_bytes_available:
+        try:
+            message = input().strip().lower()
+            if message == "ring":
+                print("Received ring command!")
+                ringIncoming = True
+        except Exception as e:
+            print("Serial error:", e)
+            time.sleep(0.1)
+
+    # if ringIncoming is true, cycle the LED on and off.
+    if ringIncoming:
+        if led.value:
+            led.value = False
+            time.sleep(0.1)
+        else:
+            led.value = True
+            time.sleep(0.1)
 
     keys = keypad.pressed_keys
 
@@ -60,6 +76,7 @@ while True:
             keyboard.press(Keycode.LEFT_SHIFT, Keycode.LEFT_ALT,
                            Keycode.LEFT_CONTROL, Keycode.P)
             keyboard.release_all()
+            ringIncoming = False
 
     if keys:
         if not keyDown:
